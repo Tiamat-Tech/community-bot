@@ -1,18 +1,27 @@
 import { Message } from 'discord.js';
 import { twoslasher, TwoSlashReturn } from '@typescript/twoslash';
-import { ScriptTarget, type CompilerOptions } from 'typescript';
+import type { CompilerOptions } from 'typescript';
 import { makeCodeBlock, findCode } from '../util/codeBlocks';
 import { sendWithMessageOwnership } from '../util/send';
 import { getTypeScriptModule, TypeScript } from '../util/getTypeScriptModule';
 import { splitCustomCommand } from '../util/customCommand';
 import { Bot } from '../bot';
 
-const defaultCompilerOptions: CompilerOptions = {
-	target: ScriptTarget.ESNext,
-};
-
 // Preload typescript@latest
 getTypeScriptModule('latest');
+
+function getDefaultCompilerOptions(
+	tsModule: typeof import('typescript'),
+): CompilerOptions {
+	// TypeScript as of 6.0 has sane defaults for everything
+	if (parseFloat(tsModule.versionMajorMinor) >= 6.0) {
+		return {};
+	}
+
+	return {
+		target: tsModule.ScriptTarget.ESNext,
+	};
+}
 
 // Remove `@noErrorTruncation` from the source; this can cause lag/crashes for large errors
 function redactNoErrorTruncation(code: string) {
@@ -86,7 +95,7 @@ async function twoslash(msg: Message, version: string, content: string) {
 	try {
 		ret = twoslasher(redactNoErrorTruncation(code), 'ts', {
 			tsModule,
-			defaultCompilerOptions,
+			defaultCompilerOptions: getDefaultCompilerOptions(tsModule),
 			defaultOptions: { noErrorValidation: true },
 		});
 	} catch (e) {
@@ -125,7 +134,7 @@ async function twoslashBlock(msg: Message, code: string, tsModule: TypeScript) {
 	try {
 		ret = twoslasher(redactNoErrorTruncation(code), 'ts', {
 			tsModule,
-			defaultCompilerOptions,
+			defaultCompilerOptions: getDefaultCompilerOptions(tsModule),
 			defaultOptions: {
 				noErrorValidation: true,
 				noStaticSemanticInfo: false,

@@ -4,7 +4,7 @@
 	"description": "Typescript Community Bot",
 	"main": "dist/index.js",
 	"dependencies": {
-		"@typescript/twoslash": "^3.2.1",
+		"@typescript/twoslash": "^3.2.12",
 		"algoliasearch": "^4.14.2",
 		"discord.js": "^14.6.0",
 		"dotenv-safe": "^8.2.0",
